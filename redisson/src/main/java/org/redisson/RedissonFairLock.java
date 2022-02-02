@@ -109,12 +109,12 @@ public class RedissonFairLock extends RedissonLock implements RLock {
         if (command == RedisCommands.EVAL_NULL_BOOLEAN) {
             return evalWriteAsync(getRawName(), LongCodec.INSTANCE, command,
                     // remove stale threads
-                    "while true do " +
-                        "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);" +
-                        "if firstThreadId2 == false then " +
-                            "break;" +
-                        "end;" +
-                        "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));" +
+                    "while true do " + // 死循环
+                        "local firstThreadId2 = redis.call('lindex', KEYS[2], 0);" + // 获取 threadsQueueName 第 0 个元素
+                        "if firstThreadId2 == false then " + // 如果是 false
+                            "break;" + // 中断
+                        "end;" + // 结束死循环
+                        "local timeout = tonumber(redis.call('zscore', KEYS[3], firstThreadId2));" + // timeoutSetName
                         "if timeout <= tonumber(ARGV[3]) then " +
                             // remove the item from the queue and timeout set
                             // NOTE we do not alter any other timeout

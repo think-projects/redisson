@@ -214,6 +214,17 @@ public abstract class RedissonBaseLock extends RedissonExpirable implements RLoc
         }
     }
 
+    /**
+     *
+     * @param key
+     * @param codec
+     * @param evalCommandType
+     * @param script 脚本
+     * @param keys 传入的key集合
+     * @param params
+     * @param <T>
+     * @return
+     */
     protected <T> RFuture<T> evalWriteAsync(String key, Codec codec, RedisCommand<T> evalCommandType, String script, List<Object> keys, Object... params) {
         CommandBatchService executorService = createCommandBatchService();
         RFuture<T> result = executorService.evalWriteAsync(key, codec, evalCommandType, script, keys, params);

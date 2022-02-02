@@ -201,17 +201,17 @@ public class RedissonLock extends RedissonBaseLock {
 
     <T> RFuture<T> tryLockInnerAsync(long waitTime, long leaseTime, TimeUnit unit, long threadId, RedisStrictCommand<T> command) {
         return evalWriteAsync(getRawName(), LongCodec.INSTANCE, command,
-                "if (redis.call('exists', KEYS[1]) == 0) then " +
-                        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
-                        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
-                        "return nil; " +
-                        "end; " +
-                        "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
-                        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
-                        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
-                        "return nil; " +
-                        "end; " +
-                        "return redis.call('pttl', KEYS[1]);",
+                "if (redis.call('exists', KEYS[1]) == 0) then " + // 如果 getRawName() 不存在
+                        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " + // getRawName() 的 getLockName(threadId) + 1
+                        "redis.call('pexpire', KEYS[1], ARGV[1]); " + // 设置 getRawName() 的 超时时间 unit.toMillis(leaseTime)
+                        "return nil; " + // 返回 nil
+                        "end; " + // 结束
+                        "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " + // 如果 getRawName 存在
+                        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " + // getRawName() 的 getLockName(threadId) + 1
+                        "redis.call('pexpire', KEYS[1], ARGV[1]); " + // 设置 getRawName() 的 超时时间 unit.toMillis(leaseTime)
+                        "return nil; " + // 返回 nil
+                        "end; " + // 结束
+                        "return redis.call('pttl', KEYS[1]);", // 返回 getRawName() 的 超时时间
                 Collections.singletonList(getRawName()), unit.toMillis(leaseTime), getLockName(threadId));
     }
 

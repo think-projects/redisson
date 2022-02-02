@@ -42,7 +42,7 @@ import java.util.stream.StreamSupport;
 public abstract class RedissonObject implements RObject {
 
     protected final CommandAsyncExecutor commandExecutor;
-    protected String name;
+    protected String name; // key的名字
     protected final Codec codec;
 
     public RedissonObject(Codec codec, CommandAsyncExecutor commandExecutor, String name) {
